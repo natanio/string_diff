@@ -1,8 +1,13 @@
 # StringDiff
 
+[![Gem Version](https://badge.fury.io/rb/string_diff.svg)](https://badge.fury.io/rb/string_diff) [![Build Status](https://travis-ci.org/natanio/string_diff.png)](https://travis-ci.org/natanio/string_diff) [![License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat)](https://github.com/natanio/string_diff/blob/master/LICENSE.txt)
+
 StringDiff is a gem that compares one string to another. If insertions or deletions are made, a corresponding style is added to that difference.
 
 ## Installation
+
+*Ruby*
+**Supports Ruby 2.1.5 and above.**
 
 Add this line to your application's Gemfile:
 
@@ -18,18 +23,26 @@ Or install it yourself as:
 
     $ gem install string_diff
 
+## Dependencies
+
+Uses the gem [pragmatic_tokenizer](https://github.com/diasks2/pragmatic_tokenizer) for tokenizing strings.
+
 ## Usage
 
 
+```ruby
 string_1 = "hello world"
 string_2 ="hello beautiful world"
 StringDiff::Diff.new(string_1, string_2).diff
 # => "hello <span class='insertion'>beautiful</span> world"
 
+-------------------------------
+
 string_1 = "hello world"
 string_2 = "hello"
 StringDiff::Diff.new(string_1, string_2).diff
 # => "hello <span class='deletion'>world</span>"
+```
 
 
 ## Development
