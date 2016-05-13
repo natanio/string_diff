@@ -1,8 +1,6 @@
 # StringDiff
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/string_diff`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
+StringDiff is a gem that compares one string to another. If insertions or deletions are made, a corresponding style is added to that difference.
 
 ## Installation
 
@@ -22,7 +20,17 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+
+string_1 = "hello world"
+string_2 ="hello beautiful world"
+StringDiff::Diff.new(string_1, string_2).diff
+# => "hello <span class='insertion'>beautiful</span> world"
+
+string_1 = "hello world"
+string_2 = "hello"
+StringDiff::Diff.new(string_1, string_2).diff
+# => "hello <span class='deletion'>world</span>"
+
 
 ## Development
 
