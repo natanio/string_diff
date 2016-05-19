@@ -101,7 +101,7 @@ describe StringDiff do
 
     sd = StringDiff::Diff.new(string_1, string_2).diff
 
-    expect(sd).to eq("<span class="deletion">Traductor</span> <span class="insertion">Envía</span> mensaje <span class="deletion">de</span> <span class="insertion">el</span> <span class="insertion">al</span> <span class="insertion">traductor</span>")
+    expect(sd).to eq("<span class='deletion'>Traductor</span> <span class='insertion'>Envía</span> mensaje <span class='deletion'>de</span> <span class='insertion'>el</span> <span class='insertion>al</span> <span class=insertion'>traductor</span>")
   end
 
 end
