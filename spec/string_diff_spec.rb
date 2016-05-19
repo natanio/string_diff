@@ -68,4 +68,5 @@ describe StringDiff do
 
     expect(sd).to eq("<span class='deletion'>hello</span> <span class='insertion'>Hello</span> world")
   end
+
 end

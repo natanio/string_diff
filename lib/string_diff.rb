@@ -17,6 +17,8 @@ module StringDiff
       construct_string(compare(a1, a2))
     end
 
+    private
+
     def compare(array1, array2)
       deletions = array1 - array2
       insertions = array2 - array1
@@ -29,9 +31,9 @@ module StringDiff
     def annotate_deletions(deletions, array1)
       deletions.each do |v|
         index = array1.find_index(v)
+        next if index.nil?
         array1[index] = "<span class='deletion'>#{v}</span>"
       end
-      #array1.join(" ")
     end
 
     def annotate_insertions(insertions, array1, array2)
@@ -75,7 +77,6 @@ module StringDiff
 
         array1[missing_index[0]] = "<span class='deletion'>#{word}</span>"
       end
-      #array1.join(" ")
     end
 
     def construct_string(array1)
