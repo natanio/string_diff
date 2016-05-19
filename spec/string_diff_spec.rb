@@ -1,3 +1,4 @@
+#encoding: utf-8
 require 'spec_helper'
 
 describe StringDiff do
@@ -72,14 +73,15 @@ describe StringDiff do
   it 'should not add space before colon' do
     string_1 = "Otros beneficios:"
     string_2 = "Otras ventajas:"
+
     sd = StringDiff::Diff.new(string_1, string_2).diff
 
-    expect(sd).to eq("Otros <span class='deletion'>beneficios</span> <span class='insertion'>ventajas</span>:")
+    expect(sd).to eq("<span class='deletion'>Otros</span> <span class='insertion'>Otras</span> <span class='deletion'>beneficios</span> <span class='insertion'>ventajas</span>:")
   end
 
   it 'should not add spaces between commas and single quotes' do
     string_1 = "Nota: si su presupuesto está por debajo de la 'tarifa de no molestar' de este traductor, su mensaje no será entregado."
-    string_1 = "Nota: si su presupuesto está por debajo de la 'tarifa de no molestar' de este traductor, su mensaje no será entregado."
+    string_2 = "Nota: si su presupuesto está por debajo de la 'tarifa de no molestar' de este traductor, su mensaje no será entregado."
 
     sd = StringDiff::Diff.new(string_1, string_2).diff
 
@@ -88,7 +90,7 @@ describe StringDiff do
 
   it 'should always show insertion immediately after its deletion' do
     string_1= "Seleccione su presupuesto"
-    string_1 = "Selecciona tu presupuesto"
+    string_2 = "Selecciona tu presupuesto"
 
     sd = StringDiff::Diff.new(string_1, string_2).diff
 
@@ -97,11 +99,11 @@ describe StringDiff do
 
   it 'should add a deletion directly before a word that replaces it' do
     string_1= "Traductor mensaje de"
-    string_1 = "Envía el mensaje al traductor"
+    string_2 = "Envía el mensaje al traductor"
 
     sd = StringDiff::Diff.new(string_1, string_2).diff
 
-    expect(sd).to eq("<span class='deletion'>Traductor</span> <span class='insertion'>Envía</span> mensaje <span class='deletion'>de</span> <span class='insertion'>el</span> <span class='insertion>al</span> <span class=insertion'>traductor</span>")
+    expect(sd).to eq("<span class='deletion'>Traductor</span> <span class='insertion'>Envía</span> <span class='insertion'>el</span> mensaje <span class='deletion'>de</span> <span class='insertion'>al</span> <span class='insertion'>traductor</span>")
   end
 
 end
