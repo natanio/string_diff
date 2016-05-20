@@ -44,6 +44,9 @@ StringDiff::Diff.new(string_1, string_2).diff
 # => "hello <span class='deletion'>world</span>"
 ```
 
+## Known Bugs
+
+The gem at this point in time does not handle words that have simply changed position in the string but otherwise unchanged.
 
 ## Development
 

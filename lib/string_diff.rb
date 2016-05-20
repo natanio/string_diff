@@ -14,14 +14,47 @@ module StringDiff
       a1 = PragmaticTokenizer::Tokenizer.new(downcase: false).tokenize(string1)
       a2 = PragmaticTokenizer::Tokenizer.new(downcase: false).tokenize(string2)
 
-      construct_string(compare(a1, a2))
+      construct_string(compare(process_parens(a1), process_parens(a2)))
     end
 
     private
 
+    def process_parens(array)
+      if array.include?('(') && array.include?(')')
+        array_open_parens_indexes = array.each_index.select{|i| array[i] == "("}
+        array_closed_parens_indexes = array.each_index.select{|i| array[i] == ")"}
+
+        if array_open_parens_indexes.count == array_closed_parens_indexes.count
+          removed_count = 0
+          array_open_parens_indexes.each do |i|
+            combined_string = ""
+            combined_string += (array[i-removed_count] + array[i+1-removed_count])
+            array.delete_at(i-removed_count)
+            array.delete_at(i-removed_count)
+            array.insert(i-removed_count, combined_string)
+            removed_count += 1
+          end
+
+          array_closed_parens_indexes.each do |i|
+            combined_string = ""
+            combined_string += (array[i-(removed_count+1)] + array[i-removed_count])
+            array.delete_at(i-(removed_count+1))
+            array.delete_at(i-(removed_count+1))
+            array.insert(i-(removed_count+1), combined_string)
+            removed_count += 1
+          end
+        end
+      else
+        array
+      end
+      array
+    end
+
     def compare(array1, array2)
       deletions = array1 - array2
+      puts "deletions: #{deletions.to_s}"
       insertions = array2 - array1
+      puts "insertions: #{insertions.to_s}"
 
       process_duplicates(array1, array2)
       annotate_deletions(deletions, array1)
@@ -82,7 +115,6 @@ module StringDiff
       missing_words = (dup1 - dup2).uniq
       additional_words = (dup2 - dup1).uniq
 
-
       unless additional_words.empty?
         set_additional_duplicates_indexes(array2, additional_words)
       end
@@ -138,7 +170,14 @@ module StringDiff
             if token.scan(/(?<='>).*(?=<\/)/)[0] !~ /[[:punct:]]/ || string1.include?(" #{token.scan(/(?<='>).*(?=<\/)/)[0]}")
               string += " #{token}"
             elsif !( token.scan(/(?<='>).*(?=<\/)/)[0] =~ (/[']/) ).nil?
-              if string.scan(/[']/).empty?
+              if string.scan(/[']/).empty? || string.scan(/[(]/).empty?
+                string += " #{token}#{array1[i+1]}"
+                array1.slice!(i+1)
+              else
+                string += token
+              end
+            elsif !( token.scan(/(?<='>).*(?=<\/)/)[0] =~ (/[(]/) ).nil?
+              if string.scan(/[(]/).empty?
                 string += " #{token}#{array1[i+1]}"
                 array1.slice!(i+1)
               else
@@ -157,6 +196,13 @@ module StringDiff
               else
                 string += token
               end
+            elsif !( token =~ (/[(]/) ).nil?
+              if string.scan(/[(]/).empty?
+                string += " #{token}#{array1[i+1]}"
+                array1.slice!(i+1)
+              else
+                string += token
+              end
             else
               string += token
             end
@@ -165,6 +211,5 @@ module StringDiff
       end
       string
     end
-
   end
 end

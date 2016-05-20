@@ -106,4 +106,21 @@ describe StringDiff do
     expect(sd).to eq("<span class='deletion'>Traductor</span> <span class='insertion'>Envía</span> <span class='insertion'>el</span> mensaje <span class='deletion'>de</span> <span class='insertion'>al</span> <span class='insertion'>traductor</span>")
   end
 
+  # it 'should do something different...' do
+  #   string_1 = "Доступ из любого места к лингвистическим ресурсам (памяти переводов (translation memory, TM), глоссарии)."
+  #   string_2 = "Доступ к вашим лингвистическим ресурсам (памяти переводов, глоссарии) из любого места."
+
+  #   sd = StringDiff::Diff.new(string_1, string_2).diff
+
+  #   expect(sd).to eq("Доступ к <span class='insertion'>вашим</span> лингвистическим ресурсам (памяти переводов <span class='deletion'>(translation memory, TM)</span>, глоссарии) из любого места.")
+  # end
+
+  # it 'should handle no insertion/deletion but text in different place' do
+  #   string_1 = "Hello world wonderful"
+  #   string_2 = "Hello wonderful world"
+
+  #   sd = StringDiff::Diff.new(string_1, string_2).diff
+
+  #   expect(sd).to eq("Hello wonderful world")
+  # end
 end
