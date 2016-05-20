@@ -46,43 +46,32 @@ module StringDiff
         end
 
         if index.nil?
-          puts "Index is nil"
-          puts array1.to_s
+          # Check whether or not we're dealing with an annotated deletion/insertion, or plain token
+          contains_span = array1.last.include?("<span") ? true : false
+          contains_punct_in_span = !(array1.last.scan(/(?<='>).*(?=<\/)/)[0] =~ (/[[:punct:]]/)).nil? if contains_span
+          stand_alone_punct = array1.last =~ (/[[:punct:]]/) if !contains_span
 
           # If there is punctuation after a deletion, we need to make sure the
           # insertion is added before the punctuation.
-          if (!(array1.last.scan(/(?<='>).*(?=<\/)/)[0] =~ (/[[:punct:]]/)).nil? || (array1.last =~ (/[[:punct:]]/))) && array1[-2].include?("<span class='deletion'")
-            puts "Block 1"
+          if (contains_punct_in_span || stand_alone_punct) && array1[-2].include?("<span class='deletion'")
             array1.insert(-2, "<span class='insertion'>#{v}</span>")
-          elsif array2.find_index(v) <= (PragmaticTokenizer::Tokenizer.new(downcase: false).tokenize(string1).count)
-            puts "Block 2"
-
+          elsif array2.find_index(v) < (PragmaticTokenizer::Tokenizer.new(downcase: false).tokenize(string1).count)
             # Count how many insertions up to the original position
             insertions_count = 0
             deletions_count = 0
-            for i in 0...(array2.find_index(v)+1) do
-              puts array2.find_index(v)
-              puts i
-              puts v
-              puts array1[i].to_s
-              puts "array1 insertions test is #{array1[i].include?("<span class='insertion'")}"
+            for i in 0..(array2.find_index(v)+1) do
               insertions_count += 1 if array1[i].include?("<span class='insertion'")
               deletions_count += 1 if array1[i].include?("<span class='deletion'")
             end
-            puts "Insertion count: #{insertions_count}"
-            puts "Deletion count: #{deletions_count}"
-            puts "index: #{array2.find_index(v)}"
-            array1.insert(((array2.find_index(v) + insertions_count + deletions_count) - 1), "<span class='insertion'>#{v}</span>")
+            array1.insert(((find_correct_index(v, array1, array2) + insertions_count + deletions_count) - 1), "<span class='insertion'>#{v}</span>")
           else
             # Otherwise we put it on the end.
-            puts "Block 3"
              array1.insert(-1, "<span class='insertion'>#{v}</span>")
           end
         else
           array1.insert(index + 1, "<span class='insertion'>#{v}</span>")
         end
       end
-
       array1
     end
 
@@ -91,6 +80,12 @@ module StringDiff
       dup2 = array2.find_all { |e| array2.count(e) > 1 }
 
       missing_words = (dup1 - dup2).uniq
+      additional_words = (dup2 - dup1).uniq
+
+
+      unless additional_words.empty?
+        set_additional_duplicates_indexes(array2, additional_words)
+      end
 
       duplicate_indexs_of_array1 = []
       duplicate_indexs_of_array2 = []
@@ -110,6 +105,28 @@ module StringDiff
       end
     end
 
+    def set_additional_duplicates_indexes(array, dup)
+      @additional_indexes = array.each_index.select{|i| array[i] == dup[0]}
+    end
+
+    def find_correct_index(token, array1, array2)
+      unless @additional_indexes.nil?
+        # We need to find if the word has already been added, if so, use a later index
+        appeared_count = 0
+        array1.each do |item|
+          appeared_count += 1 if item.include?("<span class='insertion'>#{token}")
+        end
+
+        if appeared_count == 0
+          @additional_indexes[0]
+        else
+          @additional_indexes[appeared_count]
+        end
+      else
+        array2.find_index(token)
+      end
+    end
+
     def construct_string(array1)
       string = ""
 
@@ -117,7 +134,6 @@ module StringDiff
         if i == 0
           string += token
         else
-          puts token
           if token.include?("<span")
             if token.scan(/(?<='>).*(?=<\/)/)[0] !~ /[[:punct:]]/ || string1.include?(" #{token.scan(/(?<='>).*(?=<\/)/)[0]}")
               string += " #{token}"
@@ -152,53 +168,3 @@ module StringDiff
 
   end
 end
-
-
-# def annotate_insertions(insertions, array1, array2)
-#   insertions.each_with_index do |v, i|
-#     if array2.find_index(v) == 0
-#       index = 0
-#     else
-#       insertion_position = array2.find_index(v) + i - 1
-#       index = array1.find_index(array2[insertion_position])
-#     end
-
-#     if index.nil?
-#       puts "Index is nil"
-#       # If there is punctuation after a deletion, we need to make sure the
-#       # insertion is added before the punctuation.
-#       if !(array1.last.scan(/(?<='>).*(?=<\/)/)[0] =~ (/[[:punct:]]/)).nil? && array1[-2].include?("<span class='deletion'")
-#         puts "Block 1"
-#         array1.insert(-2, "<span class='insertion'>#{v}</span>")
-#       elsif array2.find_index(v) >= (PragmaticTokenizer::Tokenizer.new(downcase: false).tokenize(string1).count -1)
-#         puts "Block 2"
-#         array1.insert(-1, "<span class='insertion'>#{v}</span>")
-#       else
-#         # Otherwise we put it on the end.
-#         puts "Block 3"
-#         # Count how many insertions up to the original position
-#         insertions_count = 0
-#         for i in 0...(array2.find_index(v)+1) do
-#           puts array2.find_index(v)
-#           puts i
-#           puts v
-#           puts array1[i].to_s
-#           puts "array1 insertions test is #{array1[i].include?("<span class='insertion'")}"
-#           insertions_count += 1 if array1[i].include?("<span class='insertion'")
-#         end
-#         puts "Insertion count: #{insertions_count}"
-#         array1.insert((array2.find_index(v) + insertions_count), "<span class='insertion'>#{v}</span>")
-
-
-#         # puts array1.to_s
-#         # puts array1.count
-#         # puts v
-#         # array1.insert((array1.count -1), "<span class='insertion'>#{v}</span>")
-#       end
-#     else
-#       array1.insert(index + 1, "<span class='insertion'>#{v}</span>")
-#     end
-#   end
-
-#   array1
-# end
